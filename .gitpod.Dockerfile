@@ -77,21 +77,16 @@ RUN set -ex ;\
   --virtual .build-deps \
   ${PYTHON_BUILD_PACKAGES}) 
 ENV PYENV_ROOT="/usr/local/lib/pyenv"
+ENV CONFIGURE_OPTS="--enable-shared"
+ENV CONFIGURE_OPTS="${CONFIGURE_OPTS} --with-system-expat"
+ENV CONFIGURE_OPTS="${CONFIGURE_OPTS} --with-system-ffi"
+ENV CONFIGURE_OPTS="${CONFIGURE_OPTS} --without-ensurepip"
+# ENV CONFIGURE_OPTS="${CONFIGURE_OPTS} --enable-loadable-sqlite-extensions"
 RUN set -ex ;\
   git clone --depth 1 https://github.com/pyenv/pyenv /usr/local/lib/pyenv ;\
   export GNU_ARCH="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" ;\
-  export CONFIGURE_OPTS="--build=${GNU_ARCH}" ;\
-  CONFIGURE_OPTS="${CONFIGURE_OPTS} --enable-loadable-sqlite-extensions"; \
-  CONFIGURE_OPTS="${CONFIGURE_OPTS} --enable-shared" ; \
-  CONFIGURE_OPTS="${CONFIGURE_OPTS} --with-system-expat" ; \
-  CONFIGURE_OPTS="${CONFIGURE_OPTS} --with-system-ffi" ; \
-  CONFIGURE_OPTS="${CONFIGURE_OPTS} --without-ensurepip" ; \
-  CONFIGURE_OPTS="${CONFIGURE_OPTS} --with-shared" ; \
-  sudo \
-    --preserve-env=PYTHON_VERSION \
-    --preserve-env=GNU_ARCH \
-    --preserve-env=CONFIGURE_OPTS \
-    /usr/local/lib/pyenv/bin/pyenv install ${PYTHON_VERSION}
+  export CONFIGURE_OPTS="${CONFIGURE_OPTS} --build=${GNU_ARCH}" ;\
+  /usr/local/lib/pyenv/bin/pyenv install ${PYTHON_VERSION}
 RUN set -ex ;\
   find /usr/local \
   -type f \
