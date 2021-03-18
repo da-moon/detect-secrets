@@ -1,5 +1,3 @@
-# syntax = docker/dockerfile:1.0-experimental
-# this image is used with vscode remote-developer extension pack to setup a development
 FROM alpine:latest
 USER root
 ARG PYTHON_VERSION=3.9.2
@@ -9,6 +7,33 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositorie
   echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
   apk upgrade --no-cache -U -a && \
   apk add --no-cache sudo bash
+RUN apk add --no-cache --upgrade \
+  ca-certificates curl perl wget aria2 util-linux gnupg rng-tools-extra \
+  git build-base make openssl-dev libffi-dev \
+  ncurses ncurses-dev \
+  bash bash-completion \
+  sudo shadow libcap \
+  coreutils findutils binutils grep gawk \
+  jq yq yj yq-bash-completion \
+  htop bzip2 \
+  yarn nodejs \
+  bat glow \
+  ripgrep ripgrep-bash-completion \
+  tokei exa starship nushell just
+
+# [ NOTE ] => set timezone info
+RUN ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+ENV USER=gitpod
+SHELL ["bash","-c"]
+RUN getent group sudo > /dev/null || sudo addgroup sudo
+RUN getent passwd "${USER}" > /dev/null && userdel --remove "${USER}" -f || true
+RUN useradd --user-group --create-home --shell /bin/bash --uid 33333 "${USER}"
+RUN sed -i \
+  -e 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' \
+  -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' \
+  /etc/sudoers
+RUN usermod -aG wheel,root,sudo "${USER}"
+
 # python dev tools
 ENV PYTHON_BUILD_PACKAGES="\
   bzip2-dev \
@@ -91,33 +116,6 @@ RUN set -ex ;\
   -o -name 'tests' \
   -exec rm -rf '{}' + ;\
   ln -s /usr/local/lib/pyenv/versions/${PYTHON_VERSION}/bin/* "${PYTHON_PATH}"
-RUN apk add --no-cache --upgrade \
-  ca-certificates curl perl wget aria2 util-linux gnupg rng-tools-extra \
-  git build-base make openssl-dev libffi-dev \
-  ncurses ncurses-dev \
-  bash bash-completion \
-  sudo shadow libcap \
-  coreutils findutils binutils grep gawk \
-  jq yq yj yq-bash-completion \
-  htop bzip2 \
-  yarn nodejs \
-  bat glow \
-  ripgrep ripgrep-bash-completion \
-  tokei exa starship nushell just
-
-# [ NOTE ] => set timezone info
-RUN ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
-ARG USER=gitpod
-ENV USER $USER
-SHELL ["bash","-c"]
-RUN getent group sudo > /dev/null || sudo addgroup sudo
-RUN getent passwd "${USER}" > /dev/null && userdel --remove "${USER}" -f || true
-RUN useradd --user-group --create-home --shell /bin/bash --uid 1000 "${USER}"
-RUN sed -i \
-  -e 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' \
-  -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' \
-  /etc/sudoers
-RUN usermod -aG wheel,root,sudo "${USER}"
 USER ${USER}
 SHELL ["bash","-c"]
 ENV HOME="/home/${USER}"
