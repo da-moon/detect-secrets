@@ -81,6 +81,8 @@ ENV CONFIGURE_OPTS="--enable-shared"
 ENV CONFIGURE_OPTS="${CONFIGURE_OPTS} --with-system-expat"
 ENV CONFIGURE_OPTS="${CONFIGURE_OPTS} --with-system-ffi"
 ENV CONFIGURE_OPTS="${CONFIGURE_OPTS} --without-ensurepip"
+ENV CONFIGURE_OPTS="${CONFIGURE_OPTS} --enable-optimizations"
+
 # ENV CONFIGURE_OPTS="${CONFIGURE_OPTS} --enable-loadable-sqlite-extensions"
 RUN set -ex ;\
   git clone --depth 1 https://github.com/pyenv/pyenv /usr/local/lib/pyenv ;\
