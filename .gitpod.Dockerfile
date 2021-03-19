@@ -126,7 +126,7 @@ ENV USER $USER
 SHELL ["bash","-c"]
 RUN getent group sudo > /dev/null || sudo addgroup sudo
 RUN getent passwd "${USER}" > /dev/null && userdel --remove "${USER}" -f || true
-RUN useradd --user-group --create-home --shell /bin/bash --uid 33333 "${USER}"
+RUN useradd --user-group --create-home --shell /bin/bash --uid 1000 "${USER}"
 RUN sed -i \
   -e 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' \
   -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' \
@@ -191,8 +191,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
 # ────────────────────────────────────────────────────────────────────────────────────────────────────
 #
 RUN cargo install -j`nproc` pyoxidizer && \
-  strip /usr/local/cargo/bin/pyoxidizer && \
-  upx /usr/local/cargo/bin/pyoxidizer && \
+  strip ${HOME}/.cargo/bin/pyoxidizer && \
+  upx ${HOME}/.cargo/bin/pyoxidizer && \
   pyoxidizer --version
 #
 # ──────────────────────────────────────────────────────────────────────────────── I ──────────
