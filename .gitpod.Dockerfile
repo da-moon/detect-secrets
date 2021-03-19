@@ -1,3 +1,8 @@
+# syntax = docker/dockerfile:1.0-experimental
+
+# ─── EXAMPLE BUILD COMMAND ──────────────────────────────────────────────────────
+# docker build -t fjolsvin/gitpod-python:latest .
+# ────────────────────────────────────────────────────────────────────────────────
 FROM alpine:latest
 ENV TERM=xterm
 USER root
@@ -121,7 +126,7 @@ ENV USER $USER
 SHELL ["bash","-c"]
 RUN getent group sudo > /dev/null || sudo addgroup sudo
 RUN getent passwd "${USER}" > /dev/null && userdel --remove "${USER}" -f || true
-RUN useradd --user-group --create-home --shell /bin/bash --uid 1000 "${USER}"
+RUN useradd --user-group --create-home --shell /bin/bash --uid 33333 "${USER}"
 RUN sed -i \
   -e 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' \
   -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' \
@@ -134,13 +139,7 @@ SHELL ["bash","-c"]
 #   :::::: E N S U R I N G   C O M P I L E D   T O O L   A V A I L A B I L I T Y : :  :   :    :     :        :          :
 # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 #
-RUN python3 --version && \ 
-  sops --version && \ 
-  vault --version && \
-  terraform --version && \
-  consul --version && \
-  consul-template --version && \
-  consul-replicate --version
+RUN python3 --version
 #
 # ──────────────────────────────────────────────────────────────────────────────────────────────── I ──────────
 #   :::::: C O N F I G U R I N G   U S E R   E N V I R O N M E N T : :  :   :    :     :        :          :
@@ -202,4 +201,5 @@ RUN cargo install -j`nproc` pyoxidizer && \
 #
 RUN nu -c 'config set path $nu.path' && \
   nu -c 'config set env  $nu.env' && \
-  nu -c 'config set prompt "starship prompt"'
+  nu -c 'config set prompt "starship prompt"' && \
+  sudo usermod --shell /usr/bin/nu "${USER}"
