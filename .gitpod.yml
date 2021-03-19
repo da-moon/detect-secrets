@@ -1,4 +1,5 @@
-image: fjolsvin/gitpod-python
+# image: fjolsvin/gitpod-python
+image: python:alpine-rc
 
 vscode:
   extensions:
