@@ -1,4 +1,3 @@
-# ────────────────────────────────────────────────────────────────────────────────
 FROM alpine:latest
 ENV TERM=xterm
 USER root
@@ -176,6 +175,27 @@ RUN detect-secrets --version && \
   dephell --version && \
   pex --version
 #
+# ────────────────────────────────────────────────────────────────────────────────────────── I ──────────
+#   :::::: I N S T A L L I N G   R U S T   T O O L C H A I N : :  :   :    :     :        :          :
+# ────────────────────────────────────────────────────────────────────────────────────────────────────
+#
+ENV PATH="$PATH:${HOME}/.cargo/bin"
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
+  -y \
+  --default-host x86_64-unknown-linux-musl \
+  --default-toolchain nightly \
+  --profile default && \
+  cargo --version
+#
+# ────────────────────────────────────────────────────────────────────────────────────────── I ──────────
+#   :::::: I N S T A L L I N G   C A R G O   P A C K A G E S : :  :   :    :     :        :          :
+# ────────────────────────────────────────────────────────────────────────────────────────────────────
+#
+RUN cargo install -j`nproc` pyoxidizer && \
+  strip /usr/local/cargo/bin/pyoxidizer && \
+  upx /usr/local/cargo/bin/pyoxidizer && \
+  pyoxidizer --version
+#
 # ──────────────────────────────────────────────────────────────────────────────── I ──────────
 #   :::::: C O N F I G U R I N G   N U   S H E L L : :  :   :    :     :        :          :
 # ──────────────────────────────────────────────────────────────────────────────────────────
@@ -183,4 +203,3 @@ RUN detect-secrets --version && \
 RUN nu -c 'config set path $nu.path' && \
   nu -c 'config set env  $nu.env' && \
   nu -c 'config set prompt "starship prompt"'
-WORKDIR "/workspace"
