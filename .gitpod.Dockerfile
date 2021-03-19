@@ -123,10 +123,14 @@ RUN ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
 #
 ARG USER=gitpod
 ENV USER $USER
+ARG UID="33333"
+ENV UID $UID
+
+
 SHELL ["bash","-c"]
 RUN getent group sudo > /dev/null || sudo addgroup sudo
 RUN getent passwd "${USER}" > /dev/null && userdel --remove "${USER}" -f || true
-RUN useradd --user-group --create-home --shell /bin/bash --uid 1000 "${USER}"
+RUN useradd --user-group --create-home --shell /bin/bash --uid "$UID" "${USER}"
 RUN sed -i \
   -e 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' \
   -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' \
@@ -173,27 +177,6 @@ RUN python3 -m pip install detect-secrets pex dephell[full]
 RUN detect-secrets --version && \
   dephell --version && \
   pex --version
-#
-# ────────────────────────────────────────────────────────────────────────────────────────── I ──────────
-#   :::::: I N S T A L L I N G   R U S T   T O O L C H A I N : :  :   :    :     :        :          :
-# ────────────────────────────────────────────────────────────────────────────────────────────────────
-#
-ENV PATH="$PATH:${HOME}/.cargo/bin"
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
-  -y \
-  --default-host x86_64-unknown-linux-musl \
-  --default-toolchain nightly \
-  --profile default && \
-  cargo --version
-#
-# ────────────────────────────────────────────────────────────────────────────────────────── I ──────────
-#   :::::: I N S T A L L I N G   C A R G O   P A C K A G E S : :  :   :    :     :        :          :
-# ────────────────────────────────────────────────────────────────────────────────────────────────────
-#
-RUN cargo install -j`nproc` pyoxidizer && \
-  strip ${HOME}/.cargo/bin/pyoxidizer && \
-  upx ${HOME}/.cargo/bin/pyoxidizer && \
-  pyoxidizer --version
 #
 # ──────────────────────────────────────────────────────────────────────────────── I ──────────
 #   :::::: C O N F I G U R I N G   N U   S H E L L : :  :   :    :     :        :          :
